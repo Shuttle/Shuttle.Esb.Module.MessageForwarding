@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>Shuttle.Esb.Module.MessageForwarding</id>
+		<version>{semver}</version>
+		<authors>Eben Roux</authors>
+		<owners>Eben Roux</owners>
+		<licenseUrl>https://github.com/shuttle/Shuttle.Esb.Module.MessageForwarding/raw/master/LICENSE</licenseUrl>
+		<projectUrl>https://github.com/shuttle/Shuttle.Esb.Module.MessageForwarding</projectUrl>
+		<iconUrl>https://raw.githubusercontent.com/Shuttle/Shuttle.Esb.Module.MessageForwarding/master/.media/logo.png</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The MessageForwarding module for Shuttle.Esb will forward any handled messages onto the specified queue(s).</description>
+		<releaseNotes/>
+    <copyright>Copyright (c) {year}, Eben Roux</copyright>
+    <dependencies>
+			<dependency id="Shuttle.Core.Infrastructure" version="{Shuttle.Core.Infrastructure-version}" />
+			<dependency id="Shuttle.Esb" version="{Shuttle.Esb-version}" />
+		</dependencies>
+	</metadata>
+</package>
