@@ -5,10 +5,11 @@ namespace Shuttle.Esb.Module.MessageForwarding
 {
     public class MessageForwardingModule
     {
+        private readonly string _inboxMessagePipelineName = typeof(InboxMessagePipeline).FullName;
         private readonly MessageForwardingObserver _messageForwardingObserver;
-        private readonly string _inboxMessagePipelineName = typeof (InboxMessagePipeline).FullName;
 
-        public MessageForwardingModule(IPipelineFactory pipelineFactory, MessageForwardingObserver messageForwardingObserver)
+        public MessageForwardingModule(IPipelineFactory pipelineFactory,
+            MessageForwardingObserver messageForwardingObserver)
         {
             Guard.AgainstNull(pipelineFactory, "pipelineFactory");
             Guard.AgainstNull(messageForwardingObserver, "messageForwardingObserver");

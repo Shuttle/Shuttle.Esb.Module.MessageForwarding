@@ -1,80 +1,64 @@
 ﻿using System;
-using System.Linq;
 using Shuttle.Core.Infrastructure;
 
 namespace Shuttle.Esb.Module.MessageForwarding
 {
-	public class MessageForwardingObserver : IPipelineObserver<OnAfterHandleMessage>
-	{
-	    private readonly IQueueManager _queueManager;
-	    private readonly IMessageRouteCollection _messageRoutes = new MessageRouteCollection();
+    public class MessageForwardingObserver : IPipelineObserver<OnAfterHandleMessage>
+    {
+        private readonly IMessageRouteProvider _messageRouteProvider = new DefaultMessageRouteProvider();
 
-		private readonly ILog _log;
+        private readonly ILog _log;
 
-		public MessageForwardingObserver(IQueueManager queueManager)
-		{
-            Guard.AgainstNull(queueManager, "queueManager");
+        public MessageForwardingObserver(IMessageForwardingConfiguration configuration)
+        {
+            Guard.AgainstNull(configuration, nameof(configuration));
 
-            _queueManager = queueManager;
-		    _log = Log.For(this);
-		}
+            var specificationFactory = new MessageRouteSpecificationFactory();
 
-	    internal void Initialize(IServiceBus bus)
-		{
-			var section = ConfigurationSectionProvider.Open<MessageForwardingSection>("shuttle", "messageForwarding");
+            foreach (var messageRouteConfiguration in configuration.MessageRoutes)
+            {
+                var messageRoute = _messageRouteProvider.Find(messageRouteConfiguration.Uri);
 
-			if (section == null || section.ForwardingRoutes == null)
-			{
-				return;
-			}
+                if (messageRoute == null)
+                {
+                    messageRoute = new MessageRoute(new Uri(messageRouteConfiguration.Uri));
 
-			var factory = new MessageRouteSpecificationFactory();
+                    _messageRouteProvider.Add(messageRoute);
+                }
 
-			foreach (MessageRouteElement mapElement in section.ForwardingRoutes)
-			{
-				var map = _messageRoutes.Find(mapElement.Uri);
+                foreach (var specification in messageRouteConfiguration.Specifications)
+                {
+                    messageRoute.AddSpecification(specificationFactory.Create(specification.Name, specification.Value));
+                }
+            }
 
-				if (map == null)
-				{
-					map = new MessageRoute(_queueManager.GetQueue(mapElement.Uri));
+            _log = Log.For(this);
+        }
 
-					_messageRoutes.Add(map);
-				}
+        public void Execute(OnAfterHandleMessage pipelineEvent)
+        {
+            var state = pipelineEvent.Pipeline.State;
+            var message = state.GetMessage();
+            var transportMessage = state.GetTransportMessage();
+            var messageSender = state.GetHandlerContext() as IMessageSender;
 
-				foreach (SpecificationElement specificationElement in mapElement)
-				{
-					map.AddSpecification(factory.Create(specificationElement.Name, specificationElement.Value));
-				}
-			}
-		}
+            Guard.AgainstNull(message, "message");
+            Guard.AgainstNull(transportMessage, "transportMessage");
+            Guard.AgainstNull(messageSender, "handlerContext as IMessageSender");
 
-		public void Execute(OnAfterHandleMessage pipelineEvent)
-		{
-			var state = pipelineEvent.Pipeline.State;
-			var message = state.GetMessage();
-			var transportMessage = state.GetTransportMessage();
-			var handlerContext = state.GetHandlerContext();
+            foreach (var uri in _messageRouteProvider.GetRouteUris(message.GetType().FullName))
+            {
+                var recipientUri = uri;
 
-			Guard.AgainstNull(message, "message");
-			Guard.AgainstNull(transportMessage, "transportMessage");
-			Guard.AgainstNull(handlerContext, "handlerContext");
+                if (_log.IsTraceEnabled)
+                {
+                    _log.Trace(string.Format(MessageForwardingResources.TraceForwarding, transportMessage.MessageType,
+                        transportMessage.MessageId, new Uri(recipientUri).Secured()));
+                }
 
-			foreach (
-				var uri in
-					_messageRoutes.FindAll(message.GetType().FullName)
-						.Select(messageRoute => messageRoute.Queue.Uri.ToString())
-						.ToList())
-			{
-				var recipientUri = uri;
-
-				if (_log.IsTraceEnabled)
-				{
-					_log.Trace(string.Format(MessageForwardingResources.TraceForwarding, transportMessage.MessageType,
-						transportMessage.MessageId, new Uri(recipientUri).Secured()));
-				}
-
-				handlerContext.Send(message, c => c.WithRecipient(recipientUri));
-			}
-		}
-	}
+                // ReSharper disable once PossibleNullReferenceException
+                messageSender.Send(message, c => c.WithRecipient(recipientUri));
+            }
+        }
+    }
 }
