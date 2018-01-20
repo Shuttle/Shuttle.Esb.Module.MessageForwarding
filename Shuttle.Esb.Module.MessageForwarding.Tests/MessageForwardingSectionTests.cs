@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using NUnit.Framework;
-using Shuttle.Core.Infrastructure;
+using Shuttle.Core.Configuration;
 
 namespace Shuttle.Esb.Module.MessageForwarding.Tests
 {
@@ -25,7 +25,7 @@ namespace Shuttle.Esb.Module.MessageForwarding.Tests
 
 				foreach (SpecificationElement specification in map)
 				{
-					Console.WriteLine("-> {0} - {1}", specification.Name, specification.Value);
+					Console.WriteLine(@"-> {0} - {1}", specification.Name, specification.Value);
 				}
 
 				Console.WriteLine();

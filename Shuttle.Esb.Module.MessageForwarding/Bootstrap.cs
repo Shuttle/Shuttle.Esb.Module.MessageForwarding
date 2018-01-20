@@ -1,4 +1,5 @@
-﻿using Shuttle.Core.Infrastructure;
+﻿using Shuttle.Core.Container;
+using Shuttle.Core.Contract;
 
 namespace Shuttle.Esb.Module.MessageForwarding
 {
@@ -11,7 +12,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
 
 		public void Register(IComponentRegistry registry)
 		{
-			Guard.AgainstNull(registry, "registry");
+			Guard.AgainstNull(registry, nameof(registry));
 
 			if (_registryBootstrapCalled)
 			{
@@ -26,7 +27,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
 
 		public void Resolve(IComponentResolver resolver)
 		{
-			Guard.AgainstNull(resolver, "resolver");
+			Guard.AgainstNull(resolver, nameof(resolver));
 
 			if (_resolverBootstrapCalled)
 			{

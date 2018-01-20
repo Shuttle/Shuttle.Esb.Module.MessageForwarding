@@ -1,5 +1,6 @@
 ﻿using System;
-using Shuttle.Core.Infrastructure;
+using Shuttle.Core.Contract;
+using Shuttle.Core.Pipelines;
 
 namespace Shuttle.Esb.Module.MessageForwarding
 {
@@ -10,8 +11,8 @@ namespace Shuttle.Esb.Module.MessageForwarding
 
         public MessageForwardingModule(IPipelineFactory pipelineFactory, MessageForwardingObserver messageForwardingObserver)
         {
-            Guard.AgainstNull(pipelineFactory, "pipelineFactory");
-            Guard.AgainstNull(messageForwardingObserver, "messageForwardingObserver");
+            Guard.AgainstNull(pipelineFactory, nameof(pipelineFactory));
+            Guard.AgainstNull(messageForwardingObserver, nameof(messageForwardingObserver));
 
             _messageForwardingObserver = messageForwardingObserver;
 
@@ -20,9 +21,8 @@ namespace Shuttle.Esb.Module.MessageForwarding
 
         private void PipelineCreated(object sender, PipelineEventArgs e)
         {
-            if (
-                !e.Pipeline.GetType()
-                    .FullName.Equals(_inboxMessagePipelineName, StringComparison.InvariantCultureIgnoreCase))
+            if (!(e.Pipeline.GetType().FullName ?? string.Empty)
+                .Equals(_inboxMessagePipelineName, StringComparison.InvariantCultureIgnoreCase))
             {
                 return;
             }

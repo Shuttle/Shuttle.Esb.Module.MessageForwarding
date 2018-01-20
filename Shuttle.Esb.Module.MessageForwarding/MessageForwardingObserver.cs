@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Linq;
-using Shuttle.Core.Infrastructure;
+using Shuttle.Core.Configuration;
+using Shuttle.Core.Contract;
+using Shuttle.Core.Logging;
+using Shuttle.Core.Pipelines;
 
 namespace Shuttle.Esb.Module.MessageForwarding
 {
 	public class MessageForwardingObserver : IPipelineObserver<OnAfterHandleMessage>
 	{
-	    private readonly IQueueManager _queueManager;
 	    private readonly IMessageRouteCollection _messageRoutes = new MessageRouteCollection();
 
 		private readonly ILog _log;
 
-		public MessageForwardingObserver(IQueueManager queueManager)
+		public MessageForwardingObserver()
 		{
-            Guard.AgainstNull(queueManager, "queueManager");
-
-            _queueManager = queueManager;
 		    _log = Log.For(this);
 		}
 
@@ -23,7 +22,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
 		{
 			var section = ConfigurationSectionProvider.Open<MessageForwardingSection>("shuttle", "messageForwarding");
 
-			if (section == null || section.ForwardingRoutes == null)
+			if (section?.ForwardingRoutes == null)
 			{
 				return;
 			}
@@ -36,7 +35,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
 
 				if (map == null)
 				{
-					map = new MessageRoute(_queueManager.GetQueue(mapElement.Uri));
+					map = new MessageRoute(new Uri(mapElement.Uri));
 
 					_messageRoutes.Add(map);
 				}
@@ -53,16 +52,16 @@ namespace Shuttle.Esb.Module.MessageForwarding
 			var state = pipelineEvent.Pipeline.State;
 			var message = state.GetMessage();
 			var transportMessage = state.GetTransportMessage();
-			var handlerContext = state.GetHandlerContext();
+			var handlerContext = state.GetHandlerContext() as IMessageSender;
 
-			Guard.AgainstNull(message, "message");
-			Guard.AgainstNull(transportMessage, "transportMessage");
-			Guard.AgainstNull(handlerContext, "handlerContext");
+			Guard.AgainstNull(message, nameof(message));
+			Guard.AgainstNull(transportMessage, nameof(transportMessage));
+			Guard.AgainstNull(handlerContext, nameof(handlerContext));
 
 			foreach (
 				var uri in
 					_messageRoutes.FindAll(message.GetType().FullName)
-						.Select(messageRoute => messageRoute.Queue.Uri.ToString())
+						.Select(messageRoute => messageRoute.Uri.ToString())
 						.ToList())
 			{
 				var recipientUri = uri;
