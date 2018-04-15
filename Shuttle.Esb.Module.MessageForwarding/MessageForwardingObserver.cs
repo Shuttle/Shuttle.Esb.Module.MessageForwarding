@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Shuttle.Core.Configuration;
 using Shuttle.Core.Contract;
 using Shuttle.Core.Logging;
 using Shuttle.Core.Pipelines;
@@ -9,42 +8,17 @@ namespace Shuttle.Esb.Module.MessageForwarding
 {
 	public class MessageForwardingObserver : IPipelineObserver<OnAfterHandleMessage>
 	{
-	    private readonly IMessageRouteCollection _messageRoutes = new MessageRouteCollection();
+	    private readonly IMessageForwardingConfiguration _configuration;
 
 		private readonly ILog _log;
 
-		public MessageForwardingObserver()
+		public MessageForwardingObserver(IMessageForwardingConfiguration configuration)
 		{
+		    Guard.AgainstNull(configuration, nameof(configuration));
+
+		    _configuration = configuration;
+
 		    _log = Log.For(this);
-		}
-
-	    internal void Initialize(IServiceBus bus)
-		{
-			var section = ConfigurationSectionProvider.Open<MessageForwardingSection>("shuttle", "messageForwarding");
-
-			if (section?.ForwardingRoutes == null)
-			{
-				return;
-			}
-
-			var factory = new MessageRouteSpecificationFactory();
-
-			foreach (MessageRouteElement mapElement in section.ForwardingRoutes)
-			{
-				var map = _messageRoutes.Find(mapElement.Uri);
-
-				if (map == null)
-				{
-					map = new MessageRoute(new Uri(mapElement.Uri));
-
-					_messageRoutes.Add(map);
-				}
-
-				foreach (SpecificationElement specificationElement in mapElement)
-				{
-					map.AddSpecification(factory.Create(specificationElement.Name, specificationElement.Value));
-				}
-			}
 		}
 
 		public void Execute(OnAfterHandleMessage pipelineEvent)
@@ -60,7 +34,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
 
 			foreach (
 				var uri in
-					_messageRoutes.FindAll(message.GetType().FullName)
+					_configuration.MessageRoutes.FindAll(message.GetType().FullName)
 						.Select(messageRoute => messageRoute.Uri.ToString())
 						.ToList())
 			{
@@ -68,7 +42,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
 
 				if (_log.IsTraceEnabled)
 				{
-					_log.Trace(string.Format(MessageForwardingResources.TraceForwarding, transportMessage.MessageType,
+					_log.Trace(string.Format(Resources.TraceForwarding, transportMessage.MessageType,
 						transportMessage.MessageId, new Uri(recipientUri).Secured()));
 				}
 

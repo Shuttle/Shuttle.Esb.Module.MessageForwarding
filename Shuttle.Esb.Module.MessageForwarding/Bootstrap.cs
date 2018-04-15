@@ -19,7 +19,12 @@ namespace Shuttle.Esb.Module.MessageForwarding
 				return;
 			}
 
-			registry.AttemptRegister<MessageForwardingModule>();
+		    if (!registry.IsRegistered<IMessageForwardingConfiguration>())
+		    {
+		        registry.AttemptRegisterInstance(MessageForwardingSection.Configuration());
+		    }
+
+            registry.AttemptRegister<MessageForwardingModule>();
 			registry.AttemptRegister<MessageForwardingObserver>();
 
 			_registryBootstrapCalled = true;
