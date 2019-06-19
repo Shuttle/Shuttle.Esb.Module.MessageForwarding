@@ -6,7 +6,7 @@
     <version>{semver}</version>
     <authors>Eben Roux</authors>
     <owners>Eben Roux</owners>
-    <licenseUrl>https://github.com/shuttle/Shuttle.Esb.Module.MessageForwarding/raw/master/LICENSE</licenseUrl>
+    <license type="expression">BSD-3-Clause</license>
     <projectUrl>https://github.com/shuttle/Shuttle.Esb.Module.MessageForwarding</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/Shuttle/Shuttle.Esb.Module.MessageForwarding/master/.media/logo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
