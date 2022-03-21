@@ -1,4 +1,8 @@
-# Shuttle.Esb.Module.MessageForwarding
+# Message Forwarding
+
+```
+PM> Install-Package Shuttle.Esb.Module.MessageForwarding
+```
 
 The MessageForwarding module for Shuttle.Esb will forward any handled messages onto the specified queue(s).
 
