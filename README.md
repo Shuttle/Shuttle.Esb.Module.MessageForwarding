@@ -28,7 +28,7 @@ The module will attach the `MessageForwardingObserver` to the `OnAfterHandleMess
 </configuration>
 ```
 
-# Registration / Activation
+## Registration / Activation
 
 The required components may be registered by calling `ComponentRegistryExtensions.RegisterMessageForwarding(IComponentRegistry)`.
 
