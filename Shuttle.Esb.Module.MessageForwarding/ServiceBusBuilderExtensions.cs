@@ -17,6 +17,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
             builder?.Invoke(messageForwardingBuilder);
 
             serviceBusBuilder.Services.TryAddSingleton<MessageForwardingModule, MessageForwardingModule>();
+            serviceBusBuilder.Services.TryAddSingleton<MessageForwardingObserver, MessageForwardingObserver>();
 
             serviceBusBuilder.Services.AddOptions<MessageForwardingOptions>().Configure(options =>
             {
