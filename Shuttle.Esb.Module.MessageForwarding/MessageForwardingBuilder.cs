@@ -6,7 +6,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
 {
     public class MessageForwardingBuilder
     {
-        private MessageForwardingOptions _activeTimeRangeOptions = new MessageForwardingOptions();
+        private MessageForwardingOptions _messageForwardingOptions = new MessageForwardingOptions();
         public IServiceCollection Services { get; }
 
         public MessageForwardingBuilder(IServiceCollection services)
@@ -18,8 +18,8 @@ namespace Shuttle.Esb.Module.MessageForwarding
 
         public MessageForwardingOptions Options
         {
-            get => _activeTimeRangeOptions;
-            set => _activeTimeRangeOptions = value ?? throw new ArgumentNullException(nameof(value));
+            get => _messageForwardingOptions;
+            set => _messageForwardingOptions = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

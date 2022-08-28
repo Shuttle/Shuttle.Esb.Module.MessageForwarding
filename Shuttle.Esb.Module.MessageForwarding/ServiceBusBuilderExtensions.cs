@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Shuttle.Core.Contract;
+using Shuttle.Core.Pipelines;
 
 namespace Shuttle.Esb.Module.MessageForwarding
 {
@@ -24,7 +25,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
                 options.ForwardingRoutes = messageForwardingBuilder.Options.ForwardingRoutes;
             });
 
-            serviceBusBuilder.AddModule<MessageForwardingModule>();
+            serviceBusBuilder.Services.AddPipelineModule<MessageForwardingModule>();
 
             return serviceBusBuilder;
         }
