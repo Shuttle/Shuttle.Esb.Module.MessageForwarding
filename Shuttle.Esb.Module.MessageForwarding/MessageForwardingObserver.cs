@@ -40,7 +40,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
             var state = pipelineEvent.Pipeline.State;
             var message = state.GetMessage();
             var transportMessage = state.GetTransportMessage();
-            var handlerContext = state.GetHandlerContext() as IMessageSender;
+            var handlerContext = state.GetHandlerContext() as IHandlerContext;
 
             Guard.AgainstNull(message, nameof(message));
             Guard.AgainstNull(transportMessage, nameof(transportMessage));
@@ -54,7 +54,7 @@ namespace Shuttle.Esb.Module.MessageForwarding
             {
                 var recipientUri = uri;
 
-                handlerContext.Send(message, c => c.WithRecipient(recipientUri));
+                handlerContext?.Send(message, builder => builder.WithRecipient(recipientUri));
             }
         }
     }
